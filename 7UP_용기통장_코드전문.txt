@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#FBC02D">
+<title>7UP 용기통장 · WeedlerBANK</title>
+<style>
+  :root{
+    --honey:#FBC02D; --honey-deep:#F9A825; --honey-soft:#FFF3D4;
+    --ink:#3A3326; --ink-soft:#6B6253; --paper:#FFFDF6; --paper-2:#FFF8E8;
+    --line:#EFE3C2; --shadow:rgba(180,140,40,.18);
+    --c-yongseo:#E25822; --c-gamsa:#F2A03D; --c-miso:#F2C94C;
+    --c-insa:#3FA34D; --c-jasin:#2D9CDB; --c-gyeokryeo:#3B3486; --c-sarang:#8E44AD;
+    --good:#3FA34D; --soft-shadow:0 6px 22px rgba(180,140,40,.16);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+    background:
+      radial-gradient(circle at 20% 0%, #FFE9A8 0%, transparent 45%),
+      radial-gradient(circle at 90% 10%, #FFEFC2 0%, transparent 40%),
+      linear-gradient(180deg,#FFF6DC 0%, #FFFBF0 60%);
+    color:var(--ink); min-height:100vh;
+    display:flex; justify-content:center;
+    overscroll-behavior:none;
+  }
+  .phone{
+    width:100%; max-width:430px; min-height:100vh; position:relative;
+    display:flex; flex-direction:column; padding-bottom:84px;
+  }
+
+  /* ===== 상단 헤더 ===== */
+  .topbar{
+    position:sticky; top:0; z-index:40;
+    background:linear-gradient(180deg,var(--honey) 0%, var(--honey-deep) 100%);
+    color:#fff; padding:14px 18px 16px; border-radius:0 0 22px 22px;
+    box-shadow:0 4px 16px rgba(220,160,30,.3);
+  }
+  .brand{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:800;letter-spacing:.5px;opacity:.92}
+  .brand .dot{width:18px;height:18px;border-radius:50%;background:#FFF6D6;box-shadow:0 0 0 4px rgba(255,255,255,.25)}
+  .balance-card{margin-top:10px;display:flex;align-items:flex-end;justify-content:space-between}
+  .balance-card .label{font-size:12px;opacity:.9;font-weight:600}
+  .balance-card .amount{font-size:38px;font-weight:900;line-height:1;letter-spacing:-1px;display:flex;align-items:baseline;gap:4px}
+  .balance-card .amount small{font-size:16px;font-weight:800;opacity:.9}
+  .lvbadge{background:rgba(255,255,255,.22);border:1.5px solid rgba(255,255,255,.5);padding:6px 12px;border-radius:999px;font-size:12px;font-weight:800;backdrop-filter:blur(4px)}
+
+  /* ===== 캐릭터 성장 영역 ===== */
+  .garden{
+    margin:16px 16px 0; background:linear-gradient(180deg,#EAF7E9 0%, #F3FBF1 100%);
+    border-radius:24px; padding:18px; text-align:center; position:relative; overflow:hidden;
+    box-shadow:var(--soft-shadow); border:2px solid #DCEEDA;
+  }
+  .garden .sky{position:absolute;inset:0;background:radial-gradient(circle at 80% 20%, #FFF7C9 0%, transparent 40%);pointer-events:none}
+  .weedler-wrap{position:relative;display:inline-block;transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
+  .weedler-wrap.bounce{animation:bounce .6s}
+  @keyframes bounce{0%,100%{transform:translateY(0) scale(1)}30%{transform:translateY(-14px) scale(1.08)}60%{transform:translateY(0) scale(.97)}}
+  .weedler-img{width:128px;height:auto;display:block;filter:drop-shadow(0 7px 8px rgba(80,140,70,.28));position:relative;z-index:2;transition:width .5s ease, filter .5s ease}
+  /* 단계별 빛무리 */
+  .weedler-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:0;height:0;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,240,170,.85) 0%, rgba(255,224,120,.35) 45%, transparent 70%);
+    z-index:1;transition:width .6s ease,height .6s ease;pointer-events:none}
+  /* 주변에 피어나는 식물(단계별로 표시) */
+  .flora{position:absolute;bottom:6px;font-size:22px;opacity:0;transform:translateY(8px) scale(.6);transition:.6s cubic-bezier(.34,1.56,.64,1);z-index:0;pointer-events:none}
+  .flora.show{opacity:1;transform:translateY(0) scale(1)}
+  .flora.f1{left:8%}.flora.f2{right:8%}.flora.f3{left:20%;bottom:0}.flora.f4{right:20%;bottom:0}
+  /* 반짝이 별 */
+  .sparkle{position:absolute;font-size:16px;opacity:0;z-index:3;transition:.5s;pointer-events:none}
+  .sparkle.show{opacity:1;animation:twinkle 1.8s ease-in-out infinite}
+  @keyframes twinkle{0%,100%{opacity:.5;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
+  .sparkle.s1{top:8px;left:24%}.sparkle.s2{top:0;right:26%;animation-delay:.6s}.sparkle.s3{top:30px;right:14%;animation-delay:1.1s}
+  .stage-name{margin-top:6px;font-size:15px;font-weight:800;color:#2E7D32}
+  .progress-wrap{margin:12px 6px 2px}
+  .progress-track{height:14px;background:#D6EAD3;border-radius:999px;overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,.08)}
+  .progress-fill{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#7BC96F,#4CAF50);transition:width .6s cubic-bezier(.4,0,.2,1)}
+  .progress-text{font-size:11px;color:#4f7a4c;margin-top:5px;font-weight:600}
+
+  /* ===== 섹션 공통 ===== */
+  .section{margin:18px 16px 0}
+  .section-title{font-size:15px;font-weight:800;color:var(--ink);margin:0 4px 10px;display:flex;align-items:center;gap:7px}
+  .section-title .em{font-size:18px}
+
+  /* ===== 7UP 덕목 선택 ===== */
+  .virtues{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+  .virtue{
+    border:none;background:var(--paper);border-radius:18px;padding:11px 4px 9px;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:5px;
+    box-shadow:0 2px 8px rgba(180,140,40,.1); transition:transform .15s, box-shadow .15s;
+    border:2px solid transparent;
+  }
+  .virtue:active{transform:scale(.93)}
+  .virtue .face{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;font-weight:900}
+  .virtue .vname{font-size:12px;font-weight:800;color:var(--ink)}
+  .virtue.sel{border-color:var(--honey-deep);background:var(--honey-soft);box-shadow:0 4px 14px rgba(240,170,40,.35);transform:translateY(-2px)}
+
+  /* ===== 기분 선택 ===== */
+  .moods{display:flex;gap:8px;justify-content:space-between}
+  .mood{flex:1;border:none;background:var(--paper);border-radius:16px;padding:10px 2px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;box-shadow:0 2px 8px rgba(180,140,40,.1);transition:transform .15s;border:2px solid transparent}
+  .mood:active{transform:scale(.92)}
+  .mood .me{font-size:24px}
+  .mood .ml{font-size:10px;font-weight:700;color:var(--ink-soft)}
+  .mood.sel{border-color:var(--honey-deep);background:var(--honey-soft);transform:translateY(-2px)}
+
+  /* ===== 입력 ===== */
+  .input-card{background:var(--paper);border-radius:20px;padding:14px;box-shadow:var(--soft-shadow);border:2px solid var(--line)}
+  textarea{width:100%;border:none;resize:none;font-family:inherit;font-size:15px;color:var(--ink);background:transparent;min-height:62px;line-height:1.5}
+  textarea:focus{outline:none}
+  textarea::placeholder{color:#C4B79A}
+  .points-row{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:10px;border-top:1px dashed var(--line)}
+  .points-label{font-size:12px;font-weight:700;color:var(--ink-soft)}
+  .stars{display:flex;gap:3px}
+  .star{font-size:26px;cursor:pointer;filter:grayscale(1);opacity:.4;transition:transform .15s, opacity .15s, filter .15s}
+  .star.on{filter:none;opacity:1;transform:scale(1.05)}
+  .star:active{transform:scale(1.25)}
+
+  .save-btn{
+    width:calc(100% - 32px);margin:16px;padding:16px;border:none;border-radius:18px;cursor:pointer;
+    background:linear-gradient(180deg,#FFD54F,var(--honey-deep));color:#5A3E00;font-size:17px;font-weight:900;
+    box-shadow:0 6px 16px rgba(240,170,30,.4); transition:transform .15s, box-shadow .15s;
+  }
+  .save-btn:active{transform:translateY(2px);box-shadow:0 3px 8px rgba(240,170,30,.4)}
+  .save-btn:disabled{background:#E8E0CC;color:#A99;box-shadow:none;cursor:default}
+
+  /* ===== 거래내역 ===== */
+  .ledger{margin:4px 16px 0}
+  .entry{
+    display:flex;align-items:center;gap:11px;background:var(--paper);border-radius:16px;
+    padding:11px 13px;margin-bottom:8px;box-shadow:0 2px 8px rgba(180,140,40,.09);
+    animation:slideIn .35s ease;
+  }
+  @keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .entry .badge{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:900}
+  .entry .body{flex:1;min-width:0}
+  .entry .etop{display:flex;align-items:center;gap:6px}
+  .entry .ev{font-size:13px;font-weight:800}
+  .entry .ed{font-size:11px;color:#B0A586}
+  .entry .etxt{font-size:13px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+  .entry .epts{font-weight:900;color:var(--honey-deep);font-size:15px;flex-shrink:0}
+  .entry .emood{font-size:18px;flex-shrink:0}
+  .empty-ledger{text-align:center;color:#BCAE8E;font-size:13px;padding:24px 10px;line-height:1.6}
+
+  /* ===== 뱃지 ===== */
+  .badges{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .bchip{background:var(--paper);border-radius:16px;padding:12px 4px;text-align:center;box-shadow:0 2px 8px rgba(180,140,40,.09);position:relative;opacity:.45;filter:grayscale(.8);transition:.3s}
+  .bchip.earned{opacity:1;filter:none;box-shadow:0 4px 12px rgba(240,170,40,.28)}
+  .bchip .bem{font-size:26px;display:block}
+  .bchip .bnm{font-size:11px;font-weight:800;margin-top:3px;color:var(--ink)}
+  .bchip .bct{font-size:10px;color:#B0A586;margin-top:1px}
+  .bchip.earned .bct{color:var(--good);font-weight:700}
+
+  /* ===== 하단 탭바 ===== */
+  .tabbar{
+    position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;
+    background:rgba(255,253,246,.94);backdrop-filter:blur(12px);
+    border-top:1.5px solid var(--line);display:flex;padding:8px 0 max(8px,env(safe-area-inset-bottom));z-index:50;
+  }
+  .tab{flex:1;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;color:#B6A98A;font-size:11px;font-weight:700;padding:4px}
+  .tab .ti{font-size:21px}
+  .tab.active{color:var(--honey-deep)}
+
+  /* ===== 뷰 전환 ===== */
+  .view{display:none}
+  .view.active{display:block;animation:fade .3s}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+
+  /* ===== 토스트 / 격려 ===== */
+  .toast{
+    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.8);
+    background:rgba(58,51,38,.96);color:#fff;padding:18px 26px;border-radius:20px;
+    font-size:16px;font-weight:800;text-align:center;z-index:100;opacity:0;pointer-events:none;
+    transition:.3s cubic-bezier(.34,1.56,.64,1);max-width:80%;box-shadow:0 10px 40px rgba(0,0,0,.3)
+  }
+  .toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  .toast .te{font-size:34px;display:block;margin-bottom:6px}
+  .toast .ts{font-size:13px;font-weight:600;opacity:.85;margin-top:5px}
+
+  /* 폭죽 */
+  .confetti{position:fixed;width:10px;height:10px;z-index:99;pointer-events:none;border-radius:2px}
+
+  /* ===== 통계 카드 ===== */
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  .stat-card{background:var(--paper);border-radius:18px;padding:15px;box-shadow:var(--soft-shadow);text-align:center}
+  .stat-card .sv{font-size:28px;font-weight:900;color:var(--honey-deep);line-height:1}
+  .stat-card .sl{font-size:12px;color:var(--ink-soft);margin-top:5px;font-weight:600}
+  .vbar-row{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+  .vbar-row .vlb{width:34px;font-size:12px;font-weight:800;flex-shrink:0}
+  .vbar-track{flex:1;height:13px;background:#F0E8D2;border-radius:999px;overflow:hidden}
+  .vbar-fill{height:100%;border-radius:999px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+  .vbar-val{width:24px;text-align:right;font-size:12px;font-weight:800;color:var(--ink-soft);flex-shrink:0}
+
+  /* 모드 전환(학생/선생님) */
+  .mode-switch{position:fixed;top:10px;right:12px;z-index:60;background:rgba(255,255,255,.3);border:1.5px solid rgba(255,255,255,.6);color:#fff;font-size:11px;font-weight:800;padding:6px 11px;border-radius:999px;cursor:pointer;backdrop-filter:blur(4px)}
+
+  /* ===== 선생님 대시보드 ===== */
+  .teacher{display:none;background:#F7F4EC;min-height:100vh}
+  .teacher.active{display:block}
+  .t-head{background:linear-gradient(135deg,#3B3486,#5B52A8);color:#fff;padding:20px 18px;border-radius:0 0 24px 24px}
+  .t-head h1{margin:0;font-size:20px;font-weight:900}
+  .t-head p{margin:4px 0 0;font-size:13px;opacity:.85}
+  .t-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:14px 16px}
+  .t-stat{background:#fff;border-radius:16px;padding:13px 8px;text-align:center;box-shadow:0 2px 10px rgba(90,80,160,.12)}
+  .t-stat .tv{font-size:23px;font-weight:900;color:#3B3486}
+  .t-stat .tl{font-size:11px;color:#777;margin-top:3px;font-weight:600}
+  .t-section{margin:16px}
+  .t-section h2{font-size:15px;font-weight:800;margin:0 2px 10px;color:#3A3326}
+  .student-row{display:flex;align-items:center;gap:12px;background:#fff;border-radius:14px;padding:12px 14px;margin-bottom:8px;box-shadow:0 2px 8px rgba(90,80,160,.08)}
+  .student-row .av{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;background:#EAF7E9;flex-shrink:0}
+  .student-row .sinfo{flex:1;min-width:0}
+  .student-row .sn{font-size:14px;font-weight:800}
+  .student-row .smeta{font-size:11px;color:#999;margin-top:2px}
+  .student-row .sbal{text-align:right;flex-shrink:0}
+  .student-row .sbal .bnum{font-size:18px;font-weight:900;color:#3B3486}
+  .student-row .sbal .blbl{font-size:10px;color:#aaa}
+  .t-note{background:#EDE9FB;border-radius:14px;padding:13px 15px;font-size:12px;color:#5B52A8;line-height:1.6;margin-bottom:10px}
+  .pill{display:inline-block;font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;background:#EAF7E9;color:#2E7D32;margin-left:4px}
+
+  .save-note{background:var(--paper);border-radius:16px;padding:14px 15px;box-shadow:0 2px 8px rgba(180,140,40,.09);font-size:12px;color:var(--ink-soft);line-height:1.6;display:flex;flex-direction:column;gap:11px}
+  .save-note b{color:var(--ink)}
+  .reset-btn{align-self:flex-start;background:#FBEDE7;border:1.5px solid #F2C9B8;color:#C0561F;font-size:12px;font-weight:800;padding:8px 14px;border-radius:12px;cursor:pointer;transition:transform .15s}
+  .reset-btn:active{transform:scale(.95)}
+</style>
+</head>
+<body>
+
+<!-- ============ 학생 앱 ============ -->
+<div class="phone" id="studentApp">
+  <button class="mode-switch" onclick="toggleMode()">👩‍🏫 선생님</button>
+
+  <!-- 헤더 -->
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span>WeedlerBANK · 7UP 용기통장</div>
+    <div class="balance-card">
+      <div>
+        <div class="label">내 마음 잔고</div>
+        <div class="amount" id="balanceAmt">0<small>점</small></div>
+      </div>
+      <div class="lvbadge" id="levelBadge">Lv.1 새싹</div>
+    </div>
+  </div>
+
+  <!-- ===== HOME 뷰 ===== -->
+  <div class="view active" id="view-home">
+    <!-- 캐릭터 정원 -->
+    <div class="garden">
+      <div class="sky"></div>
+      <div class="weedler-wrap" id="weedlerWrap">
+        <div class="weedler-glow" id="weedlerGlow"></div>
+        <span class="sparkle s1" id="spk1">✨</span>
+        <span class="sparkle s2" id="spk2">⭐</span>
+        <span class="sparkle s3" id="spk3">✨</span>
+        <img class="weedler-img" id="weedlerImg" alt="위들러">
+        <span class="flora f1" id="fl1">🌱</span>
+        <span class="flora f2" id="fl2">🌱</span>
+        <span class="flora f3" id="fl3">🌸</span>
+        <span class="flora f4" id="fl4">🌳</span>
+      </div>
+      <div class="stage-name" id="stageName">새싹 위들러</div>
+      <div class="progress-wrap">
+        <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
+        <div class="progress-text" id="progText">다음 단계까지 10점</div>
+      </div>
+    </div>
+
+    <!-- 오늘의 적립 -->
+    <div class="section">
+      <div class="section-title"><span class="em">🌤️</span>먼저, 오늘 기분은 어때?</div>
+      <div class="moods" id="moodRow"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><span class="em">✍️</span>오늘 어떤 마음을 실천했어?</div>
+      <div class="virtues" id="virtueGrid"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><span class="em">💛</span>실천한 내용을 적어줘</div>
+      <div class="input-card">
+        <textarea id="entryText" placeholder="예) 용서: 동생과 치킨 때문에 싸웠는데 내가 먼저 용서하고 사과하니 답답했던 마음이 시원해졌다."></textarea>
+        <div class="points-row">
+          <span class="points-label">이 실천, 나에게 몇 점?</span>
+          <div class="stars" id="starRow"></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="save-btn" id="saveBtn" onclick="saveEntry()">통장에 적립하기 +</button>
+  </div>
+
+  <!-- ===== 통장(거래내역) 뷰 ===== -->
+  <div class="view" id="view-ledger">
+    <div class="section">
+      <div class="section-title"><span class="em">📖</span>나의 마음 통장 내역</div>
+    </div>
+    <div class="ledger" id="ledgerList"></div>
+  </div>
+
+  <!-- ===== 성장(통계) 뷰 ===== -->
+  <div class="view" id="view-stats">
+    <div class="section">
+      <div class="section-title"><span class="em">📈</span>내 마음이 자란 만큼</div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="sv" id="stTotal">0</div><div class="sl">총 적립 점수</div></div>
+        <div class="stat-card"><div class="sv" id="stDays">0</div><div class="sl">실천한 날</div></div>
+        <div class="stat-card"><div class="sv" id="stStreak">0</div><div class="sl">연속 실천(일)</div></div>
+        <div class="stat-card"><div class="sv" id="stAvg">0</div><div class="sl">하루 평균 점수</div></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="em">🎨</span>덕목별 실천</div>
+      <div id="virtueBars"></div>
+    </div>
+    <div class="section">
+      <div class="section-title"><span class="em">🏅</span>모은 용기 뱃지</div>
+      <div class="badges" id="badgeGrid"></div>
+    </div>
+    <div class="section">
+      <div class="save-note">
+        <span>💾 내 기록은 <b>이 휴대폰 안에</b> 저장돼서, 앱을 닫았다 열어도 그대로 있어.</span>
+        <button class="reset-btn" onclick="resetAll()">기록 새로 시작하기</button>
+      </div>
+    </div>
+    <div style="height:20px"></div>
+  </div>
+
+  <!-- 탭바 -->
+  <div class="tabbar">
+    <button class="tab active" data-view="home" onclick="switchView('home',this)"><span class="ti">✍️</span>적립</button>
+    <button class="tab" data-view="ledger" onclick="switchView('ledger',this)"><span class="ti">📖</span>통장</button>
+    <button class="tab" data-view="stats" onclick="switchView('stats',this)"><span class="ti">🌳</span>성장</button>
+  </div>
+</div>
+
+<!-- ============ 선생님 대시보드 ============ -->
+<div class="teacher" id="teacherApp">
+  <button class="mode-switch" style="background:rgba(255,255,255,.25)" onclick="toggleMode()">🙋 학생</button>
+  <div class="t-head">
+    <h1>7UP 용기통장 · 학급 대시보드</h1>
+    <p>3학년 2반 · 우리 반 마음 성장 현황</p>
+  </div>
+  <div class="t-summary">
+    <div class="t-stat"><div class="tv" id="tTotalBal">0</div><div class="tl">반 전체 잔고</div></div>
+    <div class="t-stat"><div class="tv" id="tActive">0</div><div class="tl">오늘 적립한 학생</div></div>
+    <div class="t-stat"><div class="tv" id="tAvg">0</div><div class="tl">1인 평균 점수</div></div>
+  </div>
+  <div class="t-section">
+    <div class="t-note">💡 이 화면은 <b>비교·줄세우기가 아니라</b>, 누가 격려가 필요한지 살펴보기 위한 거예요. 잔고가 적은 학생은 '뒤처진 아이'가 아니라 <b>곧 용기를 낼 아이</b>입니다.</div>
+    <h2>우리 반 친구들</h2>
+    <div id="studentList"></div>
+  </div>
+  <div class="t-section">
+    <h2>이번 주 우리 반이 가장 많이 실천한 마음</h2>
+    <div id="classVirtueBars"></div>
+  </div>
+  <div style="height:30px"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const WEEDLER_IMG='data:image/png;base64, ...(위들러 캐릭터 이미지 데이터, 약 10만자 생략)...';
+/* ====== 7UP 덕목 정의 ====== */
+const VIRTUES = [
+  {key:'용서', en:'forgiveness', icon:'🤝', color:'var(--c-yongseo)'},
+  {key:'감사', en:'appreciation', icon:'🙏', color:'var(--c-gamsa)'},
+  {key:'미소', en:'smile', icon:'😊', color:'var(--c-miso)'},
+  {key:'인사', en:'greeting', icon:'👋', color:'var(--c-insa)'},
+  {key:'자신감', en:'confidence', icon:'💪', color:'var(--c-jasin)'},
+  {key:'격려', en:'encouragement', icon:'📣', color:'var(--c-gyeokryeo)'},
+  {key:'사랑', en:'love', icon:'💗', color:'var(--c-sarang)'},
+];
+const MOODS = [
+  {key:'매우좋음', em:'☀️', lb:'맑음'},
+  {key:'좋음', em:'🌈', lb:'설렘'},
+  {key:'보통', em:'⛅', lb:'보통'},
+  {key:'슬픔', em:'🌧️', lb:'슬픔'},
+  {key:'화남', em:'⚡', lb:'화남'},
+];
+/* 성장 단계: 위들러는 늘 위들러! 대신 크기·빛·주변 식물이 풍성해짐 */
+const STAGES = [
+  {min:0,   size:108, glow:0,   flora:0, sparkle:0, name:'아기 위들러',   lv:'Lv.1 새싹'},
+  {min:30,  size:120, glow:90,  flora:1, sparkle:0, name:'쑥쑥 위들러',   lv:'Lv.2 새순'},
+  {min:70,  size:132, glow:130, flora:2, sparkle:1, name:'씩씩 위들러',   lv:'Lv.3 화분'},
+  {min:130, size:146, glow:170, flora:3, sparkle:2, name:'든든 위들러',   lv:'Lv.4 나무'},
+  {min:220, size:160, glow:210, flora:4, sparkle:3, name:'반짝 위들러',   lv:'Lv.5 큰나무'},
+  {min:350, size:176, glow:250, flora:4, sparkle:3, name:'용기왕 위들러', lv:'Lv.6 마음숲'},
+];
+/* 격려 메시지(아들러식: 비교 아닌 자기 성장) */
+const CHEERS = [
+  {e:'🌱',t:'한 칸이 쌓였어!',s:'작은 실천이 곧 너의 잔고야'},
+  {e:'💛',t:'멋진 마음이야',s:'오늘의 너를 격려해'},
+  {e:'✨',t:'잔고가 차오르는 중',s:'어제보다 한 뼘 더 자랐어'},
+  {e:'🌳',t:'든든하게 쌓이고 있어',s:'꾸준함이 가장 큰 용기야'},
+  {e:'🙌',t:'스스로 해냈구나',s:'그 용기, 정말 근사해'},
+];
+
+let state = {
+  entries: [],         // {date, virtue, mood, text, points}
+  selVirtue: null,
+  selMood: null,
+  selPoints: 0,
+};
+
+/* ====== 저장 / 불러오기 (이 기기 안에 보관) ====== */
+const STORE_KEY = 'weedlerbank_7up_v1';
+function saveState(){
+  try{
+    localStorage.setItem(STORE_KEY, JSON.stringify({entries: state.entries}));
+  }catch(e){ /* 미리보기 환경 등 저장 불가 시 무시 */ }
+}
+function loadState(){
+  try{
+    const raw=localStorage.getItem(STORE_KEY);
+    if(raw){
+      const data=JSON.parse(raw);
+      if(data && Array.isArray(data.entries)) state.entries=data.entries;
+    }
+  }catch(e){ /* 불러오기 실패 시 빈 상태로 시작 */ }
+}
+
+/* ====== 초기 렌더 ====== */
+function init(){
+  loadState();
+  document.getElementById('weedlerImg').src=WEEDLER_IMG;
+  // 덕목 버튼
+  const vg = document.getElementById('virtueGrid');
+  VIRTUES.forEach((v,i)=>{
+    const b=document.createElement('button');
+    b.className='virtue'; b.dataset.k=v.key;
+    b.innerHTML=`<span class="face" style="background:${v.color}">${v.icon}</span><span class="vname">${v.key}</span>`;
+    b.onclick=()=>selectVirtue(v.key,b);
+    vg.appendChild(b);
+  });
+  // 7번째(사랑)가 4칸 그리드에서 외롭지 않게 빈 칸 채움 처리는 자연스럽게 grid가 함
+  // 기분
+  const mr=document.getElementById('moodRow');
+  MOODS.forEach(m=>{
+    const b=document.createElement('button');
+    b.className='mood'; b.dataset.k=m.key;
+    b.innerHTML=`<span class="me">${m.em}</span><span class="ml">${m.lb}</span>`;
+    b.onclick=()=>selectMood(m.key,b);
+    mr.appendChild(b);
+  });
+  // 별점
+  const sr=document.getElementById('starRow');
+  for(let i=1;i<=5;i++){
+    const s=document.createElement('span');
+    s.className='star'; s.textContent='⭐'; s.dataset.v=i;
+    s.onclick=()=>selectPoints(i);
+    sr.appendChild(s);
+  }
+  // 뱃지 그리드
+  const bg=document.getElementById('badgeGrid');
+  VIRTUES.forEach(v=>{
+    const c=document.createElement('div');
+    c.className='bchip'; c.dataset.k=v.key;
+    c.innerHTML=`<span class="bem">${v.icon}</span><div class="bnm">${v.key}</div><div class="bct">0/2회</div>`;
+    bg.appendChild(c);
+  });
+  loadDemoForTeacher();
+  render();
+}
+
+function selectVirtue(k,el){
+  state.selVirtue=k;
+  document.querySelectorAll('.virtue').forEach(x=>x.classList.toggle('sel',x.dataset.k===k));
+}
+function selectMood(k,el){
+  state.selMood=k;
+  document.querySelectorAll('.mood').forEach(x=>x.classList.toggle('sel',x.dataset.k===k));
+}
+function selectPoints(v){
+  state.selPoints=v;
+  document.querySelectorAll('.star').forEach(s=>s.classList.toggle('on', +s.dataset.v<=v));
+}
+
+/* ====== 적립 ====== */
+function saveEntry(){
+  const text=document.getElementById('entryText').value.trim();
+  if(!state.selMood){ shake('🌤️ 먼저 오늘 기분을 골라줘'); return; }
+  if(!state.selVirtue){ shake('🌈 어떤 마음을 실천했는지 골라줘'); return; }
+  if(!state.selPoints){ shake('⭐ 나에게 몇 점인지 별을 눌러줘'); return; }
+  if(!text){ shake('✍️ 실천한 내용을 한 줄 적어줘'); return; }
+
+  const now=new Date();
+  state.entries.unshift({
+    date: now.toISOString(),
+    dateStr: `${now.getMonth()+1}/${now.getDate()}`,
+    virtue: state.selVirtue,
+    mood: state.selMood||'보통',
+    text, points: state.selPoints,
+  });
+  saveState();
+
+  // 캐릭터 점프 + 격려 + 폭죽
+  const wc=document.getElementById('weedlerWrap');
+  wc.classList.remove('bounce'); void wc.offsetWidth; wc.classList.add('bounce');
+  const cheer=CHEERS[Math.floor(Math.random()*CHEERS.length)];
+  showToast(cheer);
+  popConfetti();
+
+  // 초기화
+  state.selVirtue=null; state.selMood=null; state.selPoints=0;
+  document.getElementById('entryText').value='';
+  document.querySelectorAll('.virtue,.mood').forEach(x=>x.classList.remove('sel'));
+  document.querySelectorAll('.star').forEach(s=>s.classList.remove('on'));
+  render();
+}
+
+function shake(msg){
+  showToast({e:'💡',t:msg,s:''});
+}
+
+/* ====== 기록 새로 시작 ====== */
+function resetAll(){
+  if(state.entries.length===0){ showToast({e:'🌱',t:'아직 기록이 없어',s:'오늘부터 채워볼까?'}); return; }
+  const ok=confirm('지금까지 쌓은 마음 기록을 모두 지우고 새로 시작할까요?\n\n이 동작은 되돌릴 수 없어요.');
+  if(!ok) return;
+  state.entries=[];
+  saveState();
+  render();
+  showToast({e:'🌱',t:'새 통장이 열렸어',s:'다시 한 칸씩 채워가자'});
+}
+
+/* ====== 렌더 ====== */
+function render(){
+  const total=state.entries.reduce((a,e)=>a+e.points,0);
+  document.getElementById('balanceAmt').innerHTML=`${total}<small>점</small>`;
+
+  // 성장 단계
+  let stage=STAGES[0], next=null;
+  for(let i=0;i<STAGES.length;i++){
+    if(total>=STAGES[i].min){ stage=STAGES[i]; next=STAGES[i+1]||null; }
+  }
+  document.getElementById('weedlerImg').style.width=stage.size+'px';
+  document.getElementById('stageName').textContent=stage.name;
+  document.getElementById('levelBadge').textContent=stage.lv;
+  // 빛무리
+  const glow=document.getElementById('weedlerGlow');
+  glow.style.width=stage.glow+'px'; glow.style.height=stage.glow+'px';
+  // 주변 식물 (단계별 개수만큼 표시)
+  ['fl1','fl2','fl3','fl4'].forEach((id,idx)=>{
+    document.getElementById(id).classList.toggle('show', idx<stage.flora);
+  });
+  // 반짝이 별
+  ['spk1','spk2','spk3'].forEach((id,idx)=>{
+    document.getElementById(id).classList.toggle('show', idx<stage.sparkle);
+  });
+  if(next){
+    const span=next.min-stage.min, cur=total-stage.min;
+    document.getElementById('progFill').style.width=Math.min(100,cur/span*100)+'%';
+    document.getElementById('progText').textContent=`다음 단계까지 ${next.min-total}점`;
+  }else{
+    document.getElementById('progFill').style.width='100%';
+    document.getElementById('progText').textContent='최고 단계 도달! 마음숲이 되었어 🌳';
+  }
+
+  // 통장 내역
+  const ll=document.getElementById('ledgerList');
+  if(state.entries.length===0){
+    ll.innerHTML=`<div class="empty-ledger">아직 통장이 비어 있어 🌱<br>오늘의 작은 실천부터 적어볼까?</div>`;
+  }else{
+    ll.innerHTML=state.entries.map(e=>{
+      const v=VIRTUES.find(x=>x.key===e.virtue);
+      const m=MOODS.find(x=>x.key===e.mood);
+      return `<div class="entry">
+        <span class="badge" style="background:${v.color}">${v.icon}</span>
+        <div class="body">
+          <div class="etop"><span class="ev" style="color:${v.color}">${e.virtue}</span><span class="ed">${e.dateStr}</span></div>
+          <div class="etxt">${escapeHtml(e.text)}</div>
+        </div>
+        <span class="emood">${m?m.em:'⛅'}</span>
+        <span class="epts">+${e.points}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // 통계
+  document.getElementById('stTotal').textContent=total;
+  const days=new Set(state.entries.map(e=>e.dateStr)).size;
+  document.getElementById('stDays').textContent=days;
+  document.getElementById('stStreak').textContent=calcStreak();
+  document.getElementById('stAvg').textContent=days?(total/days).toFixed(1):0;
+
+  // 덕목별 바
+  const counts={}; VIRTUES.forEach(v=>counts[v.key]=0);
+  state.entries.forEach(e=>counts[e.virtue]=(counts[e.virtue]||0)+1);
+  const maxc=Math.max(1,...Object.values(counts));
+  document.getElementById('virtueBars').innerHTML=VIRTUES.map(v=>`
+    <div class="vbar-row">
+      <span class="vlb" style="color:${v.color}">${v.key}</span>
+      <div class="vbar-track"><div class="vbar-fill" style="width:${counts[v.key]/maxc*100}%;background:${v.color}"></div></div>
+      <span class="vbar-val">${counts[v.key]}</span>
+    </div>`).join('');
+
+  // 뱃지(2회 이상 실천 시 획득)
+  document.querySelectorAll('.bchip').forEach(c=>{
+    const k=c.dataset.k, n=counts[k]||0;
+    c.querySelector('.bct').textContent= n>=2?'획득!':`${n}/2회`;
+    c.classList.toggle('earned', n>=2);
+  });
+}
+
+function calcStreak(){
+  if(!state.entries.length) return 0;
+  const dates=[...new Set(state.entries.map(e=>e.date.slice(0,10)))].sort().reverse();
+  let streak=0; let cur=new Date(); cur.setHours(0,0,0,0);
+  for(const d of dates){
+    const dd=new Date(d); dd.setHours(0,0,0,0);
+    const diff=Math.round((cur-dd)/86400000);
+    if(diff===streak){streak++;}
+    else if(diff===streak+1 && streak===0){ /*어제부터*/ streak++; cur=dd;}
+    else break;
+  }
+  return streak;
+}
+
+function escapeHtml(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ====== 뷰 전환 ====== */
+function switchView(v,el){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+/* ====== 토스트 / 폭죽 ====== */
+let toastTimer;
+function showToast(c){
+  const t=document.getElementById('toast');
+  t.innerHTML=`<span class="te">${c.e}</span>${c.t}${c.s?`<span class="ts">${c.s}</span>`:''}`;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),1700);
+}
+function popConfetti(){
+  const colors=['#FBC02D','#E25822','#3FA34D','#2D9CDB','#8E44AD','#F2C94C'];
+  for(let i=0;i<24;i++){
+    const c=document.createElement('div');
+    c.className='confetti';
+    c.style.background=colors[i%colors.length];
+    c.style.left='50%'; c.style.top='45%';
+    document.body.appendChild(c);
+    const ang=Math.random()*Math.PI*2, vel=80+Math.random()*120;
+    const dx=Math.cos(ang)*vel, dy=Math.sin(ang)*vel-60;
+    c.animate([
+      {transform:'translate(0,0) rotate(0deg)',opacity:1},
+      {transform:`translate(${dx}px,${dy+200}px) rotate(${Math.random()*720}deg)`,opacity:0}
+    ],{duration:1100+Math.random()*500,easing:'cubic-bezier(.2,.6,.4,1)'}).onfinish=()=>c.remove();
+  }
+}
+
+/* ====== 모드 전환 ====== */
+function toggleMode(){
+  const s=document.getElementById('studentApp'), t=document.getElementById('teacherApp');
+  if(t.classList.contains('active')){
+    t.classList.remove('active'); s.style.display='flex';
+  }else{
+    t.classList.add('active'); s.style.display='none';
+    renderTeacher();
+  }
+  window.scrollTo(0,0);
+}
+
+/* ====== 선생님 대시보드 데모 데이터 ====== */
+let demoStudents=[];
+function loadDemoForTeacher(){
+  const names=['민서','지호','수아','하준','서연','도윤','채원','은우','지안','유나'];
+  const avatars=['🦊','🐻','🐰','🐱','🐨','🦁','🐯','🐧','🐢','🦉'];
+  demoStudents=names.map((n,i)=>{
+    const cnt=Math.floor(Math.random()*8)+1;
+    let bal=0; const vc={};
+    for(let j=0;j<cnt;j++){bal+=Math.floor(Math.random()*5)+1; const v=VIRTUES[Math.floor(Math.random()*7)].key; vc[v]=(vc[v]||0)+1;}
+    return {name:n, av:avatars[i], bal, cnt, today: Math.random()>0.4, vc};
+  });
+}
+function renderTeacher(){
+  // '나'(학생앱 사용자)도 반에 포함
+  const myBal=state.entries.reduce((a,e)=>a+e.points,0);
+  const all=[{name:'나', av:'🌟', bal:myBal, cnt:state.entries.length, today:state.entries.some(e=>e.date.slice(0,10)===new Date().toISOString().slice(0,10)), vc:(()=>{const o={};state.entries.forEach(e=>o[e.virtue]=(o[e.virtue]||0)+1);return o;})()}, ...demoStudents];
+  const totalBal=all.reduce((a,s)=>a+s.bal,0);
+  const activeToday=all.filter(s=>s.today).length;
+  document.getElementById('tTotalBal').textContent=totalBal;
+  document.getElementById('tActive').textContent=activeToday;
+  document.getElementById('tAvg').textContent=(totalBal/all.length).toFixed(0);
+
+  // 잔고순 정렬하되, 의도적으로 '낮은 학생'에 격려 표시
+  const sorted=[...all].sort((a,b)=>b.bal-a.bal);
+  document.getElementById('studentList').innerHTML=sorted.map(s=>{
+    const needCheer = s.bal < totalBal/all.length*0.5;
+    return `<div class="student-row">
+      <span class="av">${s.av}</span>
+      <div class="sinfo">
+        <div class="sn">${s.name}${s.today?'<span class="pill">오늘 적립</span>':''}${needCheer?'<span class="pill" style="background:#FFF3D4;color:#C77700">격려 필요</span>':''}</div>
+        <div class="smeta">${s.cnt}회 실천</div>
+      </div>
+      <div class="sbal"><div class="bnum">${s.bal}</div><div class="blbl">점</div></div>
+    </div>`;
+  }).join('');
+
+  // 반 전체 덕목 집계
+  const cv={}; VIRTUES.forEach(v=>cv[v.key]=0);
+  all.forEach(s=>{for(const k in s.vc)cv[k]=(cv[k]||0)+s.vc[k];});
+  const maxv=Math.max(1,...Object.values(cv));
+  document.getElementById('classVirtueBars').innerHTML=VIRTUES.map(v=>`
+    <div class="vbar-row">
+      <span class="vlb" style="color:${v.color}">${v.key}</span>
+      <div class="vbar-track"><div class="vbar-fill" style="width:${cv[v.key]/maxv*100}%;background:${v.color}"></div></div>
+      <span class="vbar-val">${cv[v.key]}</span>
+    </div>`).join('');
+}
+
+init();
+</script>
+</body>
+</html>
